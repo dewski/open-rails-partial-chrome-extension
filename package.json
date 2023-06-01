@@ -1,5 +1,5 @@
 {
-  "name": "rails-open-partial-chrome-extension",
+  "name": "open-rails-partial-chrome-extension",
   "version": "0.1.0",
   "description": "Chrome extension that supports opening Rails partials found on the page in VS Code",
   "main": "index.js",
@@ -14,7 +14,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dewski/rails-open-partial-chrome-extension.git"
+    "url": "https://github.com/dewski/open-rails-partial-chrome-extension.git"
   },
   "devDependencies": {
     "@types/chrome": "0.0.158",

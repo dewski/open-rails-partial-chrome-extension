@@ -3,7 +3,7 @@
 chrome.runtime.onMessage.addListener(
   ({ action, value }, sender, sendResponse) => {
     if (action === "openPath") {
-      const url = new URL("vscode://dewski.rails-open-partial/partial");
+      const url = new URL("vscode://dewski.open-rails-partial/partial");
       url.searchParams.append("path", value);
       window.open(url, "_blank");
     }
