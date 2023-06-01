@@ -2,7 +2,7 @@
 
 ![build](https://github.com/dewski/rails-open-partial-chrome-extension/workflows/build/badge.svg)
 
-Open your Rails partials in your editor from the browser.
+Open your Rails partials in your editor from the browser. Currently only supports VS Code.
 
 ![](./screenshot.png)
 
