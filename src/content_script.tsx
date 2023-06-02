@@ -50,6 +50,9 @@ if (
 ) {
   document.addEventListener("mouseover", onMouseOver, true);
 } else {
+  // On page load clear the partials
+  clearPartials();
+
   // For other pages where we should not expect to find any partials, clear the
   // list of partials anytime the page becomes visible.
   document.addEventListener(
