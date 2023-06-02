@@ -1,4 +1,4 @@
-export function commentPartialPath(element: HTMLElement): string | null {
+export function commentPartialPath(element: Node): string | null {
   if (element.nodeType !== Node.COMMENT_NODE) {
     return null;
   }
@@ -11,34 +11,34 @@ export function commentPartialPath(element: HTMLElement): string | null {
   return matches[1];
 }
 
-export function findNearestPartialComment(
-  element: HTMLElement
-): HTMLElement | null {
-  // The nearest partial comment will be a sibling comment node to an element,
-  // starting from a given element search all available previous siblings for a
-  // partial comment.
-  let sibling = element.previousSibling as HTMLElement;
-  while (sibling !== null) {
-    if (commentPartialPath(sibling)) {
-      return sibling;
-    }
-
-    sibling = sibling.previousSibling as HTMLElement;
+function nearestPartialComment(element: Node): Node | null {
+  if (!element) {
+    return null;
   }
 
-  // If we have not found a partial comment in the siblings, search the parent
-  // and repeat the process until we reach the root of the document.
-  if (element.parentNode !== null) {
-    return findNearestPartialComment(element.parentNode as HTMLElement);
+  if (element.nodeType === Node.COMMENT_NODE) {
+    const partialPath = commentPartialPath(element);
+    if (partialPath) {
+      return element;
+    } else if (element.parentElement) {
+      return nearestPartialComment(element.parentElement);
+    } else {
+      return null;
+    }
+  }
+
+  const nextCandidate = element.previousSibling ?? element.parentElement;
+  if (nextCandidate) {
+    return nearestPartialComment(nextCandidate);
   }
 
   return null;
 }
 
 // Build a list of partial paths from a given element
-export function walkPartialComments(element: HTMLElement): string[] {
-  let partialPaths: string[] = [];
-  let partialComment = findNearestPartialComment(element);
+export function walkPartialComments(element: Node): string[] {
+  const partialPaths = [];
+  let partialComment = nearestPartialComment(element);
 
   while (partialComment !== null) {
     const partialPath = commentPartialPath(partialComment);
@@ -46,12 +46,10 @@ export function walkPartialComments(element: HTMLElement): string[] {
       partialPaths.push(partialPath);
     }
 
-    const nextElement = partialComment.previousSibling
-      ? partialComment
-      : partialComment.parentElement;
-
-    partialComment = nextElement
-      ? findNearestPartialComment(nextElement as HTMLElement)
+    const nextCandidate =
+      partialComment.previousSibling ?? partialComment.parentElement;
+    partialComment = nextCandidate
+      ? nearestPartialComment(nextCandidate)
       : null;
   }
 
