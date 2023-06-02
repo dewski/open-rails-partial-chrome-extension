@@ -11,7 +11,7 @@ export function commentPartialPath(element: Node): string | null {
   return matches[1];
 }
 
-function nearestPartialComment(element: Node): Node | null {
+export function nearestPartialComment(element: Node): Node | null {
   if (!element) {
     return null;
   }
