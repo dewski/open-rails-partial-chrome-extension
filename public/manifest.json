@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Rails Open Partial",
+  "name": "Open Rails Partial",
   "description": "Chrome extension that supports opening Rails partials found on the page in VS Code",
-  "version": "0.1",
+  "version": "0.0.1",
   "icons": {
     "16": "icons/16.png",
     "48": "icons/48.png",
