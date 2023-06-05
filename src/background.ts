@@ -1,27 +1,24 @@
 const ROOT_CONTEXT_MENU_ID = "openRailsPartial";
 const contexts = ["all"];
-let partials: string[] = ["noPartials"];
 
 // Setup initial context menu items
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener(() => buildContextMenu());
+
+const buildContextMenu = (partials: string[] = []) => {
+  chrome.contextMenus.removeAll();
+
   chrome.contextMenus.create({
     id: ROOT_CONTEXT_MENU_ID,
     title: "Open Rails partial",
     contexts,
   });
 
-  buildContextMenuOptions();
-});
+  buildContextMenuOptions(partials);
+};
 
-const buildContextMenuOptions = (newPartials: string[] = []) => {
-  partials.forEach((partial) => {
-    chrome.contextMenus.remove(partial);
-  });
-
-  if (newPartials.length) {
-    partials = newPartials;
-
-    newPartials.forEach((partial: string) => {
+const buildContextMenuOptions = (partials: string[] = []) => {
+  if (partials.length) {
+    partials.forEach((partial: string) => {
       chrome.contextMenus.create({
         id: partial,
         title: partial,
@@ -30,8 +27,6 @@ const buildContextMenuOptions = (newPartials: string[] = []) => {
       });
     });
   } else {
-    partials = ["noPartials"];
-
     chrome.contextMenus.create({
       id: "noPartials",
       title: "No partials found",
@@ -61,7 +56,7 @@ chrome.runtime.onMessage.addListener(
   ({ action, value }, sender, sendResponse) => {
     switch (action) {
       case "foundPartials":
-        buildContextMenuOptions(value);
+        buildContextMenu(value);
         break;
       default:
         console.debug(
