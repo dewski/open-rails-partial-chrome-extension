@@ -1,5 +1,5 @@
 import {
-  commentPartialPath,
+  parsePartialComment,
   nearestPartialComment,
   walkPartialComments,
 } from "../partials";
@@ -26,7 +26,7 @@ describe("walkPartialComments", () => {
     expect(partials).toEqual([]);
   });
 
-  test.skip("ignores sibling empty partial comments", () => {
+  test("ignores sibling empty partial comments", () => {
     document.body.innerHTML = `
       <!-- BEGIN app/layouts/application.html.erb -->
       <html>
@@ -79,6 +79,64 @@ describe("walkPartialComments", () => {
     ]);
   });
 
+  test("ignores non-partial comments between valid partial comments", () => {
+    document.body.innerHTML = `
+      <!-- BEGIN app/layouts/application.html.erb -->
+      <html>
+        <head>
+          <title>My App</title>
+        </head>
+        <body>
+          <!-- BEGIN app/users/index.html.erb -->
+            <!-- My unrelated comment -->
+            <!-- BEGIN app/users/_user.html.erb -->
+              <div id="root"></div>
+            <!-- END app/users/_user.html.erb -->
+          <!-- END app/users/index.html.erb -->
+        </body>
+      </html>
+      <!-- END app/layouts/application.html.erb -->
+    `;
+    const element = document.getElementById("root") as HTMLElement;
+    const partials = walkPartialComments(element);
+
+    expect(partials).toEqual([
+      "app/users/_user.html.erb",
+      "app/users/index.html.erb",
+      "app/layouts/application.html.erb",
+    ]);
+  });
+
+  test("ignores sibling partial comments", () => {
+    document.body.innerHTML = `
+      <!-- BEGIN app/layouts/application.html.erb -->
+      <html>
+        <head>
+          <title>My App</title>
+        </head>
+        <body>
+          <!-- BEGIN app/users/index.html.erb -->
+            <!-- BEGIN app/shared/_stats.html.erb -->
+              <div id="stats"></div>
+            <!-- END app/shared/_stats.html.erb -->
+            <!-- BEGIN app/users/_user.html.erb -->
+              <div id="root"></div>
+            <!-- END app/users/_user.html.erb -->
+          <!-- END app/users/index.html.erb -->
+        </body>
+      </html>
+      <!-- END app/layouts/application.html.erb -->
+    `;
+    const element = document.getElementById("root") as HTMLElement;
+    const partials = walkPartialComments(element);
+
+    expect(partials).toEqual([
+      "app/users/_user.html.erb",
+      "app/users/index.html.erb",
+      "app/layouts/application.html.erb",
+    ]);
+  });
+
   test("locates sibling partial comment with text in between", () => {
     document.body.innerHTML = `
       <!-- BEGIN app/layouts/application.html.erb -->
@@ -108,20 +166,31 @@ describe("walkPartialComments", () => {
   });
 });
 
-describe("commentPartialPath", () => {
-  test("parses partial path", () => {
+describe("parsePartialComment", () => {
+  test("parses beginning partial path", () => {
     document.body.innerHTML = "<!-- BEGIN app/users/index.html.erb -->";
     const comment = document.body.firstChild as HTMLElement;
-    const partialComment = commentPartialPath(comment);
+    const partialComment = parsePartialComment(comment);
 
     expect(comment.nodeName).toBe("#comment");
-    expect(partialComment).toBe("app/users/index.html.erb");
+    expect(partialComment?.path).toBe("app/users/index.html.erb");
+    expect(partialComment?.begin).toBe(true);
+  });
+
+  test("parses end partial path", () => {
+    document.body.innerHTML = "<!-- END app/users/index.html.erb -->";
+    const comment = document.body.firstChild as HTMLElement;
+    const partialComment = parsePartialComment(comment);
+
+    expect(comment.nodeName).toBe("#comment");
+    expect(partialComment?.path).toBe("app/users/index.html.erb");
+    expect(partialComment?.begin).toBe(false);
   });
 
   test("does not match comment not starting with BEGIN", () => {
     document.body.innerHTML = "<!-- app/users/index.html.erb -->";
     const comment = document.body.firstChild as HTMLElement;
-    const partialComment = commentPartialPath(comment);
+    const partialComment = parsePartialComment(comment);
 
     expect(comment.nodeName).toBe("#comment");
     expect(partialComment).toBeNull();
@@ -147,10 +216,9 @@ describe("nearestPartialComment", () => {
     const element = document.getElementById("root");
     const partialComment = nearestPartialComment(element as HTMLElement);
 
-    expect(partialComment).toEqual(element?.previousSibling);
-    expect(partialComment?.textContent?.trim()).toBe(
-      "BEGIN app/users/index.html.erb"
-    );
+    expect(partialComment?.node).toEqual(element?.previousSibling);
+    expect(partialComment?.begin).toBe(true);
+    expect(partialComment?.path).toBe("app/users/index.html.erb");
   });
 
   test("finds nearest partial comment from nested element", () => {
@@ -179,9 +247,8 @@ describe("nearestPartialComment", () => {
     const element = document.getElementById("nested");
     const partialComment = nearestPartialComment(element as HTMLElement);
 
-    expect(partialComment?.textContent?.trim()).toBe(
-      "BEGIN app/users/index.html.erb"
-    );
+    expect(partialComment?.begin).toBe(true);
+    expect(partialComment?.path).toBe("app/users/index.html.erb");
   });
 
   test("finds outer most partial in document", () => {
@@ -207,8 +274,7 @@ describe("nearestPartialComment", () => {
     const element = document.querySelector("header");
     const partialComment = nearestPartialComment(element as HTMLElement);
 
-    expect(partialComment?.textContent?.trim()).toBe(
-      "BEGIN app/layouts/application.html.erb"
-    );
+    expect(partialComment?.path).toBe("app/layouts/application.html.erb");
+    expect(partialComment?.begin).toBe(true);
   });
 });
