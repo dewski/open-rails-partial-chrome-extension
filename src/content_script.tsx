@@ -1,6 +1,6 @@
 // A message sent from the background service worker notifying us one of the
 
-import { commentPartialPath, walkPartialComments } from "./partials";
+import { parsePartialComment, walkPartialComments } from "./partials";
 
 // context menu items was selected.
 chrome.runtime.onMessage.addListener(
@@ -44,7 +44,7 @@ const onMouseOver = (event: MouseEvent) => {
 
 // For supported pages its expected that the root node will be a comment node
 // with the layout partial.
-if (document.firstChild && commentPartialPath(document.firstChild) !== null) {
+if (document.firstChild && parsePartialComment(document.firstChild)?.begin) {
   document.addEventListener("mouseover", onMouseOver, true);
 } else {
   // On page load clear the partials
