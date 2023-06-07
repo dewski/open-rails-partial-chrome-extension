@@ -1,6 +1,6 @@
 {
   "name": "open-rails-partial-chrome-extension",
-  "version": "0.1.0",
+  "version": "0.0.2",
   "description": "Chrome extension that supports opening Rails partials found on the page in VS Code",
   "main": "index.js",
   "scripts": {
