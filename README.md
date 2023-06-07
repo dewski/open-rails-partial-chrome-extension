@@ -2,7 +2,7 @@
 
 ![build](https://github.com/dewski/open-rails-partial-chrome-extension/workflows/build/badge.svg)
 
-Open any Rails partial, action, [ViewComponent](https://viewcomponent.org/), or layout directly from the browser by right clicking on any element on the page in your editor of choice. This extension will list the hierarchy of partials, actions, [ViewComponents](https://viewcomponent.org/), and layouts that were rendered for the element you inspected starting with the file that contains the element you clicked on.
+Open the nearest Rails partial, action, [ViewComponent](https://viewcomponent.org/), or layout file containing a given element on the page in your editor of choice directly from the browser by inspecting an element. This extension will list all of the parent views that were rendered in the process so you can choose which file you'd like to open.
 
 Install the [Chrome Extension](https://chrome.google.com/webstore/detail/open-rails-partial/njkledhjbnnemkphdnodpiodmnhkgdlc).
 
@@ -20,11 +20,11 @@ Currently the only editor supported is VS Code using the [`dewski.open-rails-par
 <!-- END app/users/index.html.erb -->
 ```
 
-VS Code requires the fullpath to open a file in the editor using the URI handler (`vscode://file/path/to/file`) provided by VS Code. The VS Code extension will open the relative path in your most recent window. If you attempt to open a file that doesn't exist in the current workspace, make sure you switch to the workspace window containing your Rails project.
+VS Code requires the fullpath to open a file using the built-in URI handler (`vscode://file/path/to/file`). The VS Code extension will open the relative path in your most recent window. If you attempt to open a file that doesn't exist in the current workspace, make sure you switch to the workspace window containing your Rails project.
 
 ### Enabling `annotate_rendered_view_with_filenames`
 
-For the Open Rails Partial browser extension to work, you must enable the `annotate_rendered_view_with_filenames` option in your Rails application. This will add HTML comments to the rendered view with the file name of each partial, action, and layout for the given page.
+For the Open Rails Partial browser extension to work, you must enable the `annotate_rendered_view_with_filenames` option in your Rails application. This will add HTML comments to the rendered view with the file name of each partial, action, ViewComponent, and layout for the rendered page.
 
 ```ruby
 # config/environments/development.rb
@@ -52,12 +52,6 @@ To develop the extension, you'll need to install the dependencies and build the 
 npm install
 ```
 
-### Build
-
-```
-npm run build
-```
-
 ### Build in watch mode
 
 #### terminal
@@ -68,13 +62,23 @@ npm run watch
 
 #### Visual Studio Code
 
-Run watch mode.
+Press `Ctrl + Shift + B` or `Cmd + Shift + B` to build the extension and listen for changes in development.
 
-type `Ctrl + Shift + B`
+### Load extension to Google Chrome
 
-### Load extension to chrome
-
-Load `dist` directory
+1. Visit `chrome://extensions`
+1. Enable **Developer mode** in the top right of your window
+1. Click **Load unpacked** in the top left of your window
+1. Locate and select the `dist` directory containing the built extension
 
 ### Test
+
 `npx jest` or `npm run test`
+
+### Prepare for distribution
+
+To prepare the extension for distribution to the Chrome Web Store, you'll need to build the extension:
+
+```
+npm run build
+```
